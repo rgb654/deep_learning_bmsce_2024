@@ -1,0 +1,45 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from keras import layers, models, optimizers, datasets
+
+(train_imgs,train_labels), (test_imgs,test_labels) = datasets.mnist.load_data()
+train_imgs = train_imgs.reshape((train_imgs.shape[0],28,28,1)).astype('float32')/255.0
+test_imgs = test_imgs.reshape((test_imgs.shape[0],28,28,1)).astype('float32')/255.0
+
+model = models.Sequential()
+model.add(layers.Conv2D(32, (3, 3), activation = 'relu', input_shape = (28, 28, 1)))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(64, (3, 3), activation = 'tanh'))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(64, (3, 3), activation = 'sigmoid'))
+
+model.add(layers.Flatten())
+model.add(layers.Dense(64, activation = 'relu'))
+model.add(layers.Dense(10, activation = 'softmax'))
+
+model.compile(optimizer = 'sgd',
+              loss = 'sparse_categorical_crossentropy',
+              metrics = ['accuracy'])
+
+hist = model.fit(train_imgs, train_labels, epochs = 5, validation_data = (test_imgs, test_labels))
+test_loss, test_acc = model.evaluate(test_imgs, test_labels)
+print(f'Test Accuracy:{test_acc}')
+
+plt.plot(hist.history['accuracy'])
+plt.plot(hist.history['val_accuracy'])
+plt.title('Model Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend(['Train','Test'], loc = 'upper left')
+plt.show()
+
+print(f'Test Loss:{test_loss}')
+
+plt.plot(hist.history['loss'])
+plt.plot(hist.history['val_loss'])
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend(['Train','Test'], loc = 'upper left')
+plt.show()
